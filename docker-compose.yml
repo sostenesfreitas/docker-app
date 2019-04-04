@@ -1,0 +1,47 @@
+version: '3'
+services:
+
+    clarodb:
+        image: postgres
+        container_name: clarodb
+        ports:
+            - "5432"
+        environment:
+            - POSTGRES_DB=claro
+            - POSTGRES_USER=postgres
+            - POSTGRES_PASSWORD=123
+        networks: 
+            - production-network
+
+    jboos:
+        build:
+            dockerfile: Dockerfile-jboss
+            context: .
+        image: sostenes/jboss
+        container_name: jboss
+        ports:
+            - "8080:8080"
+        networks: 
+            - production-network
+        links:
+            - clarodb
+
+    ng6:
+        build:
+            dockerfile: Dockerfile-angular
+            context: .
+        image: sostenes/ng6
+        container_name: ng6
+        ports:
+            - "4200:80"
+        networks: 
+            - production-network
+        depends_on:
+            - jboos 
+        links:
+            - jboos 
+
+
+networks: 
+    production-network:
+        driver: bridge
